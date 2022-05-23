@@ -1,0 +1,29 @@
+site_name: Preços Steam
+
+theme:
+  name: material #para usar esse tema é preciso instalar o mkdocs-material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  language: pt-br
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+  palette:
+    - scheme: default
+      primary: green
+      toggle:        
+        icon: material/weather-night
+        name: Modo noturno
+    - scheme: slate 
+      primary: teal
+      toggle:
+        
+        icon: material/weather-sunny
+        name: Modo claro
+
+markdown_extensions: #para usar esse tema é preciso instalar o pymdown-extensions
+  - pymdownx.tasklist #extende a opção de lista de tarefas
+  - pymdownx.mark #extende a opção de marcação
+  - pymdownx.tilde #extende a opção de tachado
+  - pymdownx.superfences #extende a opção de mostrar código
