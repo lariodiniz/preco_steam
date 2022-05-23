@@ -2,7 +2,7 @@
 
 Um aplicativo onte cadastramos jogos da Steam e ele nos ajuda a acompanhar os valores e promoções para comprarmos com o menor preço.
 
-[![Documentação (0.1.0)](https://img.shields.io/readthedocs/preco_steam/0.1.0?style=for-the-badge)](https://lariodiniz.github.io/preco_steam/)
+[![Documentação (0.1.0)](https://img.shields.io/readthedocs/:preco_steam/:0.1.0?style=for-the-badge)](https://lariodiniz.github.io/preco_steam/)
 ## Tecnologias
 
 As seguintes ferramentas foram usadas na construção do projeto:
