@@ -30,7 +30,7 @@ class Aplicacao(QMainWindow):
         if show:
             self.show()
 
-    def busca_imagem(self, pasta:str, imagem:str) -> str:
+    def busca_imagem(self, pasta: str, imagem: str) -> str:
         """retorna o caminho correto da imagem informada que esta no diretorio."""
         return os.path.normpath(os.path.join(pasta, imagem))
 
