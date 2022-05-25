@@ -7,7 +7,7 @@ Bem vindo a documentação do Steam Preços. Nossa documentação é dividida em
 
 * **[Desenvolvimento](desenvolvimento/)**: Esta parte documenta todos os códigos do sistema.
 
-## API
+## USUÁRIOS
 
 Nesta parte explicamos todas as telas, botões, formas de cadastros e tudo que você precisa para usar o nosso sistema.
 

@@ -27,3 +27,7 @@ markdown_extensions: #para usar esse tema é preciso instalar o pymdown-extensio
   - pymdownx.mark #extende a opção de marcação
   - pymdownx.tilde #extende a opção de tachado
   - pymdownx.superfences #extende a opção de mostrar código
+
+extra:
+ version:
+ provider: mike #Controle de versão para a documentação.

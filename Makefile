@@ -7,7 +7,7 @@ install: ## installing program using poetry. poetry needs is installed.
 
 ## @run server
 .PHONY: run
-runserver: ## activate development server.
+run: ## activate development server.
 	${POETRY} python main.py
 
 ## @tests
