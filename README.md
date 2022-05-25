@@ -5,7 +5,7 @@ Um aplicativo onte cadastramos jogos da Steam e ele nos ajuda a acompanhar os va
 ## Documentação
 * [Documentação](https://lariodiniz.github.io/preco_steam/)
 * [Documentação Usuáro](https://lariodiniz.github.io/preco_steam/usuarios/)
-* [Documentação Desenvolvimento](http://127.0.0.1:8000/desenvolvimento/)
+* [Documentação Desenvolvimento](https://lariodiniz.github.io/preco_steam/desenvolvimento/)
 ## Tecnologias
 
 As seguintes ferramentas foram usadas na construção do projeto:
@@ -41,7 +41,7 @@ poetry install
 poetry run python main.py
 ```
 ## Contribuir
-Para constribuir com esse projeto você precisa seguir o nosso [CONTRIBUTING.md](/CONTRIBUTING) e temos uma [seção de contribuição na nossa documentação](https://lariodiniz.github.io/preco_steam/desenvolvimento/contribuir/).
+Para constribuir com esse projeto você precisa seguir o nosso [CONTRIBUTING.md](/CONTRIBUTING.md) e temos uma [seção de contribuição na nossa documentação](https://lariodiniz.github.io/preco_steam/desenvolvimento/contribuir/).
 
 ## Licença
 [![licence mit](https://img.shields.io/badge/licence-MIT-blue.svg)](/LICENSE)
