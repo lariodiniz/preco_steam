@@ -20,7 +20,8 @@ Para ver um passo a passo de como contrbuir com esse projeto **[clique aqui](con
 * **[pytest-qt](https://pytest-qt.readthedocs.io/en/latest/intro.html)**
 * **[Blue](https://blue.readthedocs.io/en/latest/)**
 * **[isort](https://pycqa.github.io/isort/)**
-
+* **[pip-audit](https://pypi.org/project/pip-audit/)**
+* **[prospector](https://prospector.landscape.io/en/master/index.html)**
 
 ## Arquivos e pastas no diretório raiz
 A pasta raiz do projeto é composta pelos seguintes arquivos e diretórios.

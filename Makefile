@@ -30,12 +30,15 @@ isort: ## order the imports.
 audit: ## checks the security flaws of the modules used.
 	${POETRY} pip-audit
 
+
 ## @analyze 
 .PHONY: analyze 
 analyze : ## analyze python code.
 	${POETRY} blue . --check
 	${POETRY} pip-audit
 	${POETRY} pytest -v
+	${POETRY} prospector
+	${POETRY} prospector --with-tool pydocstyle
 
 ## @documentation 
 .PHONY: docserver
