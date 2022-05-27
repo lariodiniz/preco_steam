@@ -7,7 +7,7 @@ def cria_layout_caixa_horizontal(
     distancia_topo: int = 0,
     distancia_direita: int = 0,
     distancia_baixo: int = 0,
-):
+) -> QHBoxLayout:
     """Cria um QHBoxLayout padronizado.
 
     ..Arguments::

@@ -5,6 +5,11 @@
 arquivo python que contem a classe principal da aplicação **Preços Steam**.
 Ele cria a classe `Aplicacao` que herda de `QMainWindow`, esta classe é responsavel por criar a janela principal da aplicação e todas as outras.
 
+### Parametros
+```python
+show: bool
+```
+
 ### Atributos
 * `aplicacao.area_principal` (*QFrame*): Frame da area principal.
 * `aplicacao.barra_inferior` (*QFrame*): Frame da barra do inferior da area principal.

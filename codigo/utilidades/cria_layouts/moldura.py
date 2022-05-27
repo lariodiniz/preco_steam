@@ -1,17 +1,12 @@
 from PySide6.QtWidgets import QFrame
 
-altura_minima: int
-largura_minima: int
-altura_maxima: int
-largura_maxima: int
-
 
 def cria_layout_moldura(
     altura_minima: int = -1,
     largura_minima: int = -1,
     altura_maxima: int = -1,
     largura_maxima: int = -1,
-):
+) -> QFrame:
     """Cria um QFrame padronizado.
 
     ..Arguments::
