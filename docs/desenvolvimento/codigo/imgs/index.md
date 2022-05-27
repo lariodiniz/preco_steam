@@ -4,7 +4,7 @@
 Diretório de imagens do projeto **Preços Steam**.
 
 
-## Arquivos e pastas no diretório codigo
+## Arquivos e pastas no diretório imgs
 A pasta `codigo\imgs\` é composta pelos seguintes arquivos e diretórios.
 
 
