@@ -13,12 +13,12 @@ def test_component_botao_padrao(qtbot):
     esperado_altura = 40
     esperado_largura_minima = 50
     esperado_texto_espacamento = 55
-    esperado_texto_cor = '#c3ccdf'
+    esperado_texto_cor = '#116530'
     esperado_icone = ''
-    esperado_icone_cor = '#c3ccdf'
-    esperado_botao_cor = '#44475a'
-    esperado_botao_selecionado = '#4f5368'
-    esperado_botao_pressionado = '#282a36'
+    esperado_icone_cor = '#116530'
+    esperado_botao_cor = '#f8f8f2'
+    esperado_botao_selecionado = '#f8f8f2'
+    esperado_botao_pressionado = '#FFFFFF'
 
     assert esperado_texto == botao.text(), 'Texto do Botão incorreto'
     assert esperado_altura == botao.height(), 'Altura do Botão incorreta'
@@ -49,17 +49,17 @@ def test_component_botao_estilo(qtbot):
     botao = Botao('Teste')
     estilo_esperado = """
         QPushButton {
-            color:#c3ccdf;
-            background-color: #44475a;
+            color:#116530;
+            background-color: #f8f8f2;
             padding-left: 55px;
             text-align: left;
             border: none;
         }
         QPushButton:hover {
-            background-color: #4f5368;
+            background-color: #f8f8f2;
         }
-        QPushButton:hover {
-            background-color: #282a36;
+        QPushButton:pressed {
+            background-color: #FFFFFF;
         }
         """
     estilo_aplicacao = botao.styleSheet()
@@ -74,22 +74,22 @@ def test_component_botao_estilo_ativo(qtbot):
     botao.define_ativar(True)
     estilo_esperado = """
         QPushButton {
-            color:#c3ccdf;
-            background-color: #44475a;
+            color:#116530;
+            background-color: #f8f8f2;
             padding-left: 55px;
             text-align: left;
             border: none;
         }
         QPushButton:hover {
-            background-color: #4f5368;
+            background-color: #f8f8f2;
         }
-        QPushButton:hover {
-            background-color: #282a36;
+        QPushButton:pressed {
+            background-color: #FFFFFF;
         }
         
         QPushButton {
-            background-color: #4f5368;
-            border-right: 5px solid #282a36;
+            background-color: #f8f8f2;
+            border-right: 5px solid #FFFFFF;
 
         }
         """

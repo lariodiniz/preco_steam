@@ -15,3 +15,5 @@ Nesta parte explicamos todas as telas, botões, formas de cadastros e tudo que v
 
 Todos os arquivos de desenvolvimento do projeto estão descritos nessa parte, incluindo exemplos de utilização.
 
+Acesse o [github](https://github.com/lariodiniz/preco_steam) do nosso código e contribua com o desenvolvimento!
+

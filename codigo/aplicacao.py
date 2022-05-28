@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QLabel,
@@ -17,6 +17,7 @@ from codigo.utilidades.cria_layouts.caixa_vertical import (
     cria_layout_caixa_vertical,
 )
 from codigo.utilidades.cria_layouts.moldura import cria_layout_moldura
+from codigo.componentes.botao import Botao
 
 os.environ[
     'QT_FONT_DPI'
@@ -189,6 +190,27 @@ class Aplicacao(QMainWindow):
         # Adiciona a area principal na aplicação.
         self.setCentralWidget(area_total)
 
+    @Slot()
+    def __clique_botao_menu(self) -> None:
+        """Metodo de Clique no botão menu
+        Mostra ou esconde o menu a esquerda.
+
+        ..Returns::
+            None
+        """
+        menu_largura = self.menu_esquerdo.width()
+        width = 50
+
+        if menu_largura == width:
+            width = 240
+
+        self.animation = QPropertyAnimation(self.menu_esquerdo, b'minimumWidth')
+        self.animation.setStartValue(menu_largura)
+        self.animation.setEndValue(width)
+        self.animation.setDuration(500)
+        self.animation.setEasingCurve(QEasingCurve.InOutCirc)
+        self.animation.start()
+
     def __defineMenuEsquerdo(self) -> None:
         """Define o Layout do menu esquerdo.
 
@@ -205,15 +227,16 @@ class Aplicacao(QMainWindow):
 
         area_topo_menu_esquerdo = cria_layout_moldura(altura_minima=40)
 
-        # layout_topo_menu_esquerdo = cria_layout_caixa_vertical(
-        #    area_topo_menu_esquerdo
-        # )
+        layout_topo_menu_esquerdo = cria_layout_caixa_vertical(
+            area_topo_menu_esquerdo
+        )
 
-        # self.toggle_button = PyPushButton(text='Ocultar Barra', icon_path='icon_menu.svg')
+        self.botao_menu = Botao(texto='Ocultar Barra', botao_cor = ' #4CAE4F', icone=self.busca_imagem(self.pasta_botoes, 'menu.png'))
+        self.botao_menu.clicked.connect(self.__clique_botao_menu)
         # self.btn_1 = PyPushButton(text='Página Inicial', is_active=True, icon_path='icon_home.svg')
         # self.btn_2 = PyPushButton('Página 2', icon_path='icon_widgets.svg')
 
-        # self.layout_topo_menu_esquerdo.addWidget(self.toggle_button)
+        layout_topo_menu_esquerdo.addWidget(self.botao_menu)
         # self.layout_topo_menu_esquerdo.addWidget(self.btn_1)
         # self.layout_topo_menu_esquerdo.addWidget(self.btn_2)
 
@@ -254,6 +277,7 @@ class Aplicacao(QMainWindow):
         self.pasta_raiz = os.path.join(pasta_raiz, 'codigo')
         self.pasta_imgs = os.path.join(self.pasta_raiz, 'imgs')
         self.pasta_icones = os.path.join(self.pasta_imgs, 'icons')
+        self.pasta_botoes = os.path.join(self.pasta_imgs, 'botoes')
 
     def __defineTitulo(self) -> str:
         """Retorna o título da aplicação.

@@ -18,9 +18,11 @@ show: bool
 * `aplicacao.barra_topo` (*QFrame*): Frame da barra do topo da area principal.
 * `aplicacao.barra_topo_label_esquerdo` (*QLabel*): Label esquedo da barra_topo.
 * `aplicacao.barra_topo_label_direito` (*QLabel*): Label direito da barra_topo.
+* `aplicacao.botao_menu` (*Botao*): Botao de Menu. Espande e esconde o menu esquerdo.
 * `aplicacao.janelas` (*QStackedWidget*): Area das janelas da aplicação.
 * `aplicacao.layout_principal` (*QFrame*): Frame da janela inteira.
 * `aplicacao.menu_esquerdo` (*QFrame*): Frame do menu da esquerda.
+* `aplicacao.pasta_botoes` (*str*): string contento caminho para a pasta de botões projeto.
 * `aplicacao.pasta_icones` (*str*): string contento caminho para a pasta de icones projeto.
 * `aplicacao.pasta_imgs` (*str*): string contento caminho para a pasta de imagens projeto.
 * `aplicacao.pasta_raiz` (*str*): string contento caminho para a pasta raiz do projeto.
@@ -47,6 +49,11 @@ imagem:str
 
 * Retorno `none`
 
+
+##### **aplicacao.__clique_botao_menu**
+`aplicacao.__clique_botao_menu`: Metodo de Clique no botão menu.
+
+* Retorno `none`
 
 ##### **aplicacao.__defineLayout**
 `aplicacao.__defineLayout`: configura o layout inicial da aplicação.

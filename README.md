@@ -52,6 +52,8 @@ Este projeto esta sobe a licença [MIT](/LICENSE).
 
 O Icone da aplicação foi criado por [Icons8](https://icons8.com)
 
+O Icone do botão menu foi criado por [Icons8](https://icons8.com)
+
 ---
 
 Feito por Lário Diniz [Entre em contato!](https://www.linkedin.com/in/lariodiniz/)

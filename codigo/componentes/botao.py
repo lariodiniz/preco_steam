@@ -42,12 +42,12 @@ class Botao(QPushButton):
         altura: int = 40,
         largura_minima: int = 50,
         texto_espacamento: int = 55,
-        texto_cor: str = '#c3ccdf',
+        texto_cor: str = '#116530',
         icone: str = '',
-        icone_cor: str = '#c3ccdf',
-        botao_cor: str = '#44475a',
-        botao_selecionado: str = '#4f5368',
-        botao_pressionado: str = '#282a36',
+        icone_cor: str = '#116530',
+        botao_cor: str = '#f8f8f2',
+        botao_selecionado: str = '#f8f8f2',
+        botao_pressionado: str = '#FFFFFF',
         ativo: bool = False,
     ):
 
@@ -132,7 +132,7 @@ class Botao(QPushButton):
         QPushButton:hover {{
             background-color: {self.botao_selecionado};
         }}
-        QPushButton:hover {{
+        QPushButton:pressed {{
             background-color: {self.botao_pressionado};
         }}
         """

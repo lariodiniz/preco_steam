@@ -1,7 +1,8 @@
 import os
-
+from time import sleep
 from pytestqt.qt_compat import qt_api
-
+from PySide6.QtCore import Qt
+from PySide6 import QtTest
 from codigo.aplicacao import Aplicacao
 
 
@@ -215,3 +216,29 @@ def test_aplicacao_largura_menu_esquerdo(qtbot):
     assert (
         largura_do_menu_esquerdo_esperada == largura_do_menu_esquerdo
     ), 'Largura do menu esquerdo incorreta incorreta'
+
+def test_aplicacao_menu_esquerdo_botao_menu_texto(qtbot):
+    """Verifica o texto do botão menu"""
+    window = Aplicacao(show=False)
+    botao_texto_esperada = 'Ocultar Barra'
+    botao_texto = window.botao_menu.text()
+
+    assert (
+        botao_texto_esperada == botao_texto
+    ), 'O texto do botão menu esta incorreto'
+
+def test_aplicacao_menu_esquerdo_botao_menu_click(qtbot):
+    """Verifica o click do botão menu"""
+    window = Aplicacao(show=False)
+    qtbot.addWidget(window)
+
+    qtbot.wait_for_window_shown(window)
+    qtbot.mouseClick(window.botao_menu, Qt.LeftButton)
+    qtbot.wait(550)
+
+    largura_do_menu_esquerdo_esperada = 240
+    largura_do_menu_esquerdo = window.menu_esquerdo.width()
+    assert (
+        largura_do_menu_esquerdo_esperada == largura_do_menu_esquerdo
+    ), 'A largura do menur esquerto esta incorreta'
+
