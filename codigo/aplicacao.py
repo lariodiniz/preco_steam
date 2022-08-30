@@ -1,6 +1,7 @@
+
 import os
 
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Slot
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Slot, QThreadPool
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QLabel,
@@ -8,16 +9,28 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QSpacerItem,
     QStackedWidget,
-)
+    QProgressBar
 
+)
+from shiboken6 import Object
+
+from codigo.utilidades.versao_do_aplicativo import versao_do_aplicativo
 from codigo.utilidades.cria_layouts.caixa_horizontal import (
     cria_layout_caixa_horizontal,
 )
 from codigo.utilidades.cria_layouts.caixa_vertical import (
     cria_layout_caixa_vertical,
 )
+
+from codigo.utilidades import PadraoDeCores, GestorDeTelas
 from codigo.utilidades.cria_layouts.moldura import cria_layout_moldura
-from codigo.componentes.botao import Botao
+
+from codigo.telas.inicial.tela_inicial import TelaInicial
+from codigo.telas.cadastro.tela_cadastro import TelaCadastro
+from codigo.dados.atualiza_banco import AtualizaBanco
+from codigo.componentes import (
+    BotaoMenu, JanelaDeMensagemAviso, JanelaDeMensagemPergunta
+)
 
 os.environ[
     'QT_FONT_DPI'
@@ -33,45 +46,50 @@ class Aplicacao(QMainWindow):
 
     ..Methods::
         busca_imagem -- Retorna o caminho correto da imagem informada que esta no diretorio.
+        define_progresso --  Atualiza a barra de progresso do sistema.
 
     ..Attributes::
-        area_principal {QFrame} -- Frame da area principal.
-        barra_inferior {QFrame} -- Frame da barra do inferior da area principal.
-        barra_inferior_label_direita {QLabel} -- Label direito da barra_inferior.
-        barra_inferior_label_esquerda {QLabel} -- Label esquerdo da barra_inferior.
-        barra_topo {QFrame} -- Frame da barra do topo da area principal.
-        barra_topo_label_esquerdo {QLabel} -- Label esquedo da barra_topo.
-        barra_topo_label_direito {QLabel} -- Label direito da barra_topo.
-        janelas {QStackedWidget} -- Area das janelas da aplicação.
-        layout_principal {QFrame} -- Frame da janela inteira.
-        menu_esquerdo {QFrame} -- Frame do menu da esquerda.
+        cores {PadraoDeCores} -- Classe com as cores padrão do sistema.
+        progress_bar {QProgressBar} -- Barra de progresso na parte inferior da aplicação.
         pasta_icones {str} -- string contento o caminho dos icones.
         pasta_imgs {str} -- string contento o caminho da pasta de imagens.
         pasta_raiz {str} -- string contento o caminho da pasta da aplicação.
         versao {str} -- string contento a versão do sistema.
     """
 
-    def __init__(self, show: bool = True):
+    def __init__(self, show: bool = True) -> None:
         """Função de Inicialização da aplicação."""
         # inicializa a classe pai.
         super().__init__()
 
+        #Usa o Alambic para atualizar o banco de dados.
+        self.__atualiza_banco()
+
+        #Define as cores padrões do sistema.
+        self.__define_cores_padroes()
+        
+        # Adiciona as telas na aplicação
+        self.__telas = {
+            'inicial': GestorDeTelas(0,TelaInicial),
+            'cadastro': GestorDeTelas(1,TelaCadastro),
+        }
+
         # define pastas do sistema.
-        self.__definePastas()
+        self.__define_pastas()
 
         # define a versão
-        self.__defineVersao()
+        self.__define_versao()
 
         # define o título da aplicação.
-        title = self.__defineTitulo()
+        title = self.__define_titulo()
         self.setWindowTitle(title)
 
         # define o icone da aplicação.
-        appIcon = QIcon(self.busca_imagem(self.pasta_icones, 'logo.png'))
-        self.setWindowIcon(appIcon)
+        self.__appIcon = QIcon(self.busca_imagem(self.pasta_icones, 'logo.png'))
+        self.setWindowIcon(self.__appIcon)
 
         # define tamanho inicial de tela
-        self.__defineLayout()
+        self.__define_layout()
 
         # mostra a aplicação na tela.
         if show:
@@ -89,81 +107,214 @@ class Aplicacao(QMainWindow):
         """
         return os.path.normpath(os.path.join(pasta, imagem))
 
-    def __defineAreaPrincipal(self) -> None:
+    def define_progresso(self, valor: int) -> None:
+        """define o valor da barra de progresso
+
+        ..Arguments::
+            valor {str} -- o diretório onde a imagem esta
+            imagem {str} -- o nome da imagem
+
+        ..Returns::
+            None
+        """
+        self.progress_bar.setValue(valor)
+
+    def janela_aviso(self, titulo:str, texto:str) -> None:
+        """Mostra a Janela de aviso.
+
+        ..Arguments::
+            titulo {str} -- titulo da janela.
+            texto {str} -- texto da janela
+        ..Returns::
+            None
+        """
+        janela = JanelaDeMensagemAviso(titulo=titulo, texto=texto)
+        janela.setWindowIcon(self.__appIcon)
+        janela.exec_()
+
+    def janela_pergunta(self, titulo:str, texto:str) -> JanelaDeMensagemPergunta:
+        """Mostra a Janela de aviso.
+
+        ..Arguments::
+            titulo {str} -- titulo da janela.
+            texto {str} -- texto da janela
+        ..Returns::
+            None
+        """
+        janela = JanelaDeMensagemPergunta(titulo=titulo, texto=texto)
+        janela.setWindowIcon(self.__appIcon)
+        return janela
+
+    def __ativa_botao_menu(self, nome_botao:str) -> None:
+        """Define o botão do menu clicado como ativo e remove o ativo
+        dos outros botões.
+
+        ..Arguments::
+            nome_botao {str} -- o diretório onde a imagem esta
+
+        ..Returns::
+            None
+        """
+        for botao in self.__botoes_do_menu.keys():
+            self.__botoes_do_menu[botao].define_ativar(nome_botao==botao)
+
+    def __atualiza_banco(self) -> None:
+        """Atualiza o Banco de dados.
+
+        ..Returns::
+            None
+        """
+        atualizacao = AtualizaBanco()
+        QThreadPool().start(atualizacao)
+
+    @Slot()
+    def __clique_botao_menu(self) -> None:
+        """Metodo de Clique no botão menu
+        Mostra ou esconde o menu a esquerda.
+
+        ..Returns::
+            None
+        """
+        menu_largura = self.__menu_esquerdo.width()
+        width = 50
+
+        if menu_largura == width:
+            width = 240
+
+        self.__animation = QPropertyAnimation(self.__menu_esquerdo, b'minimumWidth')
+        self.__animation.setStartValue(menu_largura)
+        self.__animation.setEndValue(width)
+        self.__animation.setDuration(500)
+        self.__animation.setEasingCurve(QEasingCurve.InOutCirc)
+        self.__animation.start()
+
+    @Slot()
+    def __clique_botao_tela_cadastro(self) -> None:
+        """Metodo de Clique no botão tela cadastro
+        Mostra a tela de cadastro.
+
+        ..Returns::
+            None
+        """
+        self.__mostra_tela('cadastro')
+        self.__barra_topo_label_direito.setText('Cadastro')
+
+    @Slot()
+    def __clique_botao_tela_inicial(self) -> None:
+        """Metodo de Clique no botão tela inicial
+        Mostra a tela inicial.
+
+        ..Returns::
+            None
+        """
+        self.__mostra_tela('inicial')
+        self.__barra_topo_label_direito.setText('Pagina Inicial')
+
+    def __define_area_principal(self) -> None:
         """Define o Layout da Area Principal.
 
         ..Returns::
                 None
         """
-        self.area_principal = cria_layout_moldura()
-        self.area_principal.setStyleSheet('background-color: #EEEDDE')
 
-        area_principal_layout = cria_layout_caixa_vertical(self.area_principal)
+        #Cria o Frame principal.
+        area_principal = cria_layout_moldura()
+        area_principal.setStyleSheet(f'background-color: {self.cores.fundo}')
 
-        self.barra_topo = cria_layout_moldura(
-            altura_minima=30, altura_maxima=30
-        )
-        self.barra_topo.setStyleSheet(
-            'background-color: #116530;color: #FFFFFF'
-        )
+        #Cria a box vertical principal.
+        area_principal_layout = cria_layout_caixa_vertical(area_principal)
 
-        layout_barra_topo = cria_layout_caixa_horizontal(
-            self.barra_topo, 10, 0, 10, 0
+        #Cria o Frame da barra do topo.
+        barra_topo = cria_layout_moldura(altura_minima=30, altura_maxima=30)
+        barra_topo.setStyleSheet(
+            f'background-color:  {self.cores.secundaria}; color:  {self.cores.rotulo.primario.texto}'
         )
 
-        self.barra_topo_label_esquerdo = QLabel(
+        #Cria a box horizontal da barra do topo.
+        layout_barra_topo = cria_layout_caixa_horizontal(barra_topo, 10, 0, 10, 0)
+
+        #Cria o texto a esquerda da barra do topo.
+        barra_topo_label_esquerdo = QLabel(
             'Gerencie os preços dos jogos que você mais deseja!'
         )
 
+        #Cria um espaçador para a barra do topo.
         espacador_barra_topo = QSpacerItem(
             20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
         )
 
-        self.barra_topo_label_direito = QLabel('PAGINA INICIAL')
-        self.barra_topo_label_direito.setStyleSheet("font: 700 9pt 'Segoe UI'")
+        #Cria o texto a direita da barra do topo.
+        self.__barra_topo_label_direito = QLabel('Pagina Inicial')
+        self.__barra_topo_label_direito.setStyleSheet("font: 700 9pt 'Segoe UI'")
 
-        layout_barra_topo.addWidget(self.barra_topo_label_esquerdo)
+        #Adiciona os textos e o espaçador na barra do topo.
+        layout_barra_topo.addWidget(barra_topo_label_esquerdo)
         layout_barra_topo.addItem(espacador_barra_topo)
-        layout_barra_topo.addWidget(self.barra_topo_label_direito)
+        layout_barra_topo.addWidget(self.__barra_topo_label_direito)
 
-        self.janelas = QStackedWidget()
-        self.janelas.setStyleSheet('font-size:12pt; color: #f8f8f2')
-        # self.ui_pages = Ui_application_pages()
-        # self.ui_pages.setupUi(self.pages)
+        #Cria a pilha onde as janelas vão ficar.
+        self.__janelas = QStackedWidget()
+        self.__janelas.setStyleSheet(f'font-size:12pt; color: {self.cores.rotulo.primario.texto}')
 
-        # self.pages.setCurrentWidget(self.ui_pages.page_1)
+        #Adiciona as janelas na pilha.
+        for tela in self.__telas.keys():
+            self.__janelas.addWidget(self.__telas[tela].tela(self))
 
-        self.barra_inferior = cria_layout_moldura(
-            altura_minima=30, altura_maxima=30
+        #Cria o Frame da barra do inferior.
+        barra_inferior = cria_layout_moldura(altura_minima=30, altura_maxima=30)
+        barra_inferior.setStyleSheet(
+            f'background-color: {self.cores.secundaria};color: {self.cores.rotulo.primario.texto}'
         )
-        self.barra_inferior.setStyleSheet(
-            'background-color: #116530;color: #FFFFFF'
-        )
 
+        #Cria a box horizontal da barra inferior.
         layout_barra_inferior = cria_layout_caixa_horizontal(
-            self.barra_inferior, 10, 0, 10, 0
+            barra_inferior, 10, 0, 10, 0
         )
 
-        self.barra_inferior_label_esquerda = QLabel(
+        #Cria o texto a esquerda da barra inferior.
+        barra_inferior_label_esquerda = QLabel(
             '<a href="https://lariodiniz.github.io/preco_steam/">Ajuda!</a>'
         )
-        self.barra_inferior_label_esquerda.setOpenExternalLinks(True)
-        espacador_barra_inferior = QSpacerItem(
+        barra_inferior_label_esquerda.setOpenExternalLinks(True)
+
+        #Cria dois espaçadores para a barra inferior.
+        espacador_barra_inferior1 = QSpacerItem(
             20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
         )
-        self.barra_inferior_label_direita = QLabel('Criado por: Lário Diniz')
+        espacador_barra_inferior2 = QSpacerItem(
+            20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum
+        )
 
-        layout_barra_inferior.addWidget(self.barra_inferior_label_esquerda)
-        layout_barra_inferior.addItem(espacador_barra_inferior)
-        layout_barra_inferior.addWidget(self.barra_inferior_label_direita)
+        #Cria a barra de progresso da barra inferior.
+        self.progress_bar = QProgressBar()
 
-        area_principal_layout.addWidget(self.barra_topo)
-        area_principal_layout.addWidget(self.janelas)
-        area_principal_layout.addWidget(self.barra_inferior)
+        #Cria o texto a direita da barra inferior.
+        barra_inferior_label_direita = QLabel('Criado por: Lário Diniz')
 
-        self.layout_principal.addWidget(self.area_principal)
+        #Adiciona os textos, os espaçadores e a barra de progresso na barra do topo.
+        layout_barra_inferior.addWidget(barra_inferior_label_esquerda)
+        layout_barra_inferior.addItem(espacador_barra_inferior1)
+        layout_barra_inferior.addWidget(self.progress_bar)
+        layout_barra_inferior.addItem(espacador_barra_inferior2)
+        layout_barra_inferior.addWidget(barra_inferior_label_direita)
 
-    def __defineLayout(self) -> None:
+        #Adiciona as barras e as janelas na area principal.
+        area_principal_layout.addWidget(barra_topo)
+        area_principal_layout.addWidget(self.__janelas)
+        area_principal_layout.addWidget(barra_inferior)
+
+        #Adiciona a area principal na janela.
+        self.__layout_principal.addWidget(area_principal)
+
+    def __define_cores_padroes(self) -> None:
+        """Define as cores padrões da aplicação.
+
+        ..Returns::
+            None
+        """
+        self.cores = PadraoDeCores()
+
+    def __define_layout(self) -> None:
         """Configura o layout inicial da aplicação.
 
         ..Returns::
@@ -179,96 +330,72 @@ class Aplicacao(QMainWindow):
         area_total = cria_layout_moldura()
 
         # Cria o Layout da area total.
-        self.layout_principal = cria_layout_caixa_horizontal(area_total)
+        self.__layout_principal = cria_layout_caixa_horizontal(area_total)
 
         # Cria o layout do menu da area esquerda.
-        self.__defineMenuEsquerdo()
+        self.__define_menu_esquerdo()
 
         # Cria o layout da area principal.
-        self.__defineAreaPrincipal()
+        self.__define_area_principal()
 
         # Adiciona a area principal na aplicação.
         self.setCentralWidget(area_total)
 
-    @Slot()
-    def __clique_botao_menu(self) -> None:
-        """Metodo de Clique no botão menu
-        Mostra ou esconde o menu a esquerda.
-
-        ..Returns::
-            None
-        """
-        menu_largura = self.menu_esquerdo.width()
-        width = 50
-
-        if menu_largura == width:
-            width = 240
-
-        self.animation = QPropertyAnimation(self.menu_esquerdo, b'minimumWidth')
-        self.animation.setStartValue(menu_largura)
-        self.animation.setEndValue(width)
-        self.animation.setDuration(500)
-        self.animation.setEasingCurve(QEasingCurve.InOutCirc)
-        self.animation.start()
-
-    def __defineMenuEsquerdo(self) -> None:
+    def __define_menu_esquerdo(self) -> None:
         """Define o Layout do menu esquerdo.
 
         ..Returns::
             None
         """
 
-        self.menu_esquerdo = cria_layout_moldura(
-            largura_minima=50, largura_maxima=50
-        )
-        self.menu_esquerdo.setStyleSheet('background-color: #4CAE4F')
-
-        layout_menu_esquerdo = cria_layout_caixa_vertical(self.menu_esquerdo)
-
+        cor_menu_esquerdo = self.cores.primaria
+        
+        self.__menu_esquerdo = cria_layout_moldura(largura_minima=50, largura_maxima=50)
+        self.__menu_esquerdo.setStyleSheet(f'background-color: {cor_menu_esquerdo}')
+        layout_menu_esquerdo = cria_layout_caixa_vertical(self.__menu_esquerdo)
         area_topo_menu_esquerdo = cria_layout_moldura(altura_minima=40)
-
         layout_topo_menu_esquerdo = cria_layout_caixa_vertical(
             area_topo_menu_esquerdo
         )
 
-        self.botao_menu = Botao(texto='Ocultar Barra', botao_cor = ' #4CAE4F', icone=self.busca_imagem(self.pasta_botoes, 'menu.png'))
-        self.botao_menu.clicked.connect(self.__clique_botao_menu)
-        # self.btn_1 = PyPushButton(text='Página Inicial', is_active=True, icon_path='icon_home.svg')
-        # self.btn_2 = PyPushButton('Página 2', icon_path='icon_widgets.svg')
+        icone_menu = self.busca_imagem(self.pasta_botoes, 'menu.png')
+        icone_inicial = self.busca_imagem(self.pasta_botoes, 'promocao.png')
+        icone_cadastro = self.busca_imagem(self.pasta_botoes, 'cadastro.png')
 
-        layout_topo_menu_esquerdo.addWidget(self.botao_menu)
-        # self.layout_topo_menu_esquerdo.addWidget(self.btn_1)
-        # self.layout_topo_menu_esquerdo.addWidget(self.btn_2)
+        self.__botoes_do_menu ={
+            'menu': BotaoMenu(texto='Ocultar Barra', icone=icone_menu),
+            'inicial': BotaoMenu(texto='Inicial', icone=icone_inicial, ativo=True),
+            'cadastro': BotaoMenu(texto='Cadastro', icone=icone_cadastro),
+        }
 
+        self.__botoes_do_menu['menu'].clique(self.__clique_botao_menu)
+        self.__botoes_do_menu['inicial'].clique(self.__clique_botao_tela_inicial)
+        self.__botoes_do_menu['cadastro'].clique(self.__clique_botao_tela_cadastro)
+
+        for botao in self.__botoes_do_menu.keys():
+            layout_topo_menu_esquerdo.addWidget(self.__botoes_do_menu[botao])
+        
         espacador_menu_esquerdo = QSpacerItem(
             20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding
         )
 
         area_baixo_menu_esquerdo = cria_layout_moldura(altura_minima=40)
 
-        # layout_baixo_menu_esquerdo = cria_layout_caixa_vertical(
-        #    area_baixo_menu_esquerdo
-        # )
-
-        # self.settings_btn = PyPushButton(text='Configurações', icon_path='icon_settings.svg')
-
-        # self.layout_baixo_menu_esquerdo.addWidget(self.settings_btn)
-
-        self.menu_esquerdo_label_versao = QLabel(self.versao)
-        self.menu_esquerdo_label_versao.setAlignment(Qt.AlignCenter)
-        self.menu_esquerdo_label_versao.setMinimumHeight(30)
-        self.menu_esquerdo_label_versao.setMaximumHeight(30)
-        self.menu_esquerdo_label_versao.setStyleSheet('color: #FFFFFF')
+        self.__menu_esquerdo_label_versao = QLabel(self.versao)
+        self.__menu_esquerdo_label_versao.setAlignment(Qt.AlignCenter)
+        self.__menu_esquerdo_label_versao.setMinimumHeight(30)
+        self.__menu_esquerdo_label_versao.setMaximumHeight(30)
+        self.__menu_esquerdo_label_versao.setStyleSheet(f'color: {self.cores.rotulo.primario.texto}')
 
         layout_menu_esquerdo.addWidget(area_topo_menu_esquerdo)
         layout_menu_esquerdo.addItem(espacador_menu_esquerdo)
         layout_menu_esquerdo.addWidget(area_baixo_menu_esquerdo)
-        layout_menu_esquerdo.addWidget(self.menu_esquerdo_label_versao)
+        layout_menu_esquerdo.addWidget(self.__menu_esquerdo_label_versao)
 
-        self.layout_principal.addWidget(self.menu_esquerdo)
+        self.__layout_principal.addWidget(self.__menu_esquerdo)
 
-    def __definePastas(self) -> None:
-        """Cria os atributos `pasta_raiz`, `pasta_imgs` e `pasta_icones` na classe.
+    def __define_pastas(self) -> None:
+        """Cria os atributos `pasta_raiz`, `pasta_imgs`, `pasta_botoes` e `pasta_icones` na classe.
 
         ..Returns::
             None
@@ -279,35 +406,30 @@ class Aplicacao(QMainWindow):
         self.pasta_icones = os.path.join(self.pasta_imgs, 'icons')
         self.pasta_botoes = os.path.join(self.pasta_imgs, 'botoes')
 
-    def __defineTitulo(self) -> str:
+    def __define_titulo(self) -> str:
         """Retorna o título da aplicação.
 
         ..Returns::
             string - O Título da aplicação
         """
-        return 'Preço Steam'
+        return 'Jogos Desejados'
 
-    def __defineVersao(self) -> None:
+    def __define_versao(self) -> None:
         """Retorna a versão do sistema.
 
         ..Returns::
             None
         """
-        pasta_raiz = os.path.abspath(os.getcwd())
-        poetry_tom = os.path.normpath(
-            os.path.join(pasta_raiz, 'pyproject.toml')
-        )
-        version = '0.0.0'
-        with open(poetry_tom, 'r', encoding='UTF8') as arquivo:
-            read_data = arquivo.readlines()
-            for line in read_data:
-                if 'version' in line:
-                    version = line.split('=')[1]
-                    version = (
-                        version.replace(' ', '')
-                        .replace('\n', '')
-                        .replace('"', '')
-                    )
-                    break
+        self.versao = f'v{versao_do_aplicativo()}'
 
-        self.versao = f'v{version}'
+    def __mostra_tela(self, nome: str) -> None:
+        """Mostra a tela informada.
+
+        ..Arguments::
+            nome {str} -- nome da tela
+
+        ..Returns::
+            None
+        """
+        self.__ativa_botao_menu(nome)
+        self.__janelas.setCurrentIndex(self.__telas[nome].index)

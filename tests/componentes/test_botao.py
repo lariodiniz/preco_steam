@@ -17,8 +17,8 @@ def test_component_botao_padrao(qtbot):
     esperado_icone = ''
     esperado_icone_cor = '#116530'
     esperado_botao_cor = '#f8f8f2'
-    esperado_botao_selecionado = '#f8f8f2'
-    esperado_botao_pressionado = '#FFFFFF'
+    esperado_botao_selecionado = '#FFFFFF'
+    esperado_botao_pressionado = '#f8f8f2'
 
     assert esperado_texto == botao.text(), 'Texto do Botão incorreto'
     assert esperado_altura == botao.height(), 'Altura do Botão incorreta'
@@ -56,10 +56,10 @@ def test_component_botao_estilo(qtbot):
             border: none;
         }
         QPushButton:hover {
-            background-color: #f8f8f2;
+            background-color: #FFFFFF;
         }
         QPushButton:pressed {
-            background-color: #FFFFFF;
+            background-color: #f8f8f2;
         }
         """
     estilo_aplicacao = botao.styleSheet()
@@ -81,15 +81,15 @@ def test_component_botao_estilo_ativo(qtbot):
             border: none;
         }
         QPushButton:hover {
-            background-color: #f8f8f2;
+            background-color: #FFFFFF;
         }
         QPushButton:pressed {
-            background-color: #FFFFFF;
+            background-color: #f8f8f2;
         }
         
         QPushButton {
-            background-color: #f8f8f2;
-            border-right: 5px solid #FFFFFF;
+            background-color: #FFFFFF;
+            border-right: 5px solid #f8f8f2;
 
         }
         """

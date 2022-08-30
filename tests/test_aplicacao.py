@@ -242,3 +242,12 @@ def test_aplicacao_menu_esquerdo_botao_menu_click(qtbot):
         largura_do_menu_esquerdo_esperada == largura_do_menu_esquerdo
     ), 'A largura do menur esquerto esta incorreta'
 
+def test_aplicacao_menu_esquerdo_botao_menu_texto(qtbot):
+    """Verifica o texto do botão menu"""
+    window = Aplicacao(show=False)
+    botao_texto_esperada = 'Tela Inicial'
+    botao_texto = window.botao_tela_inicial.text()
+
+    assert (
+        botao_texto_esperada == botao_texto
+    ), 'O texto do botão menu esta incorreto'
