@@ -2,6 +2,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QTableWidget, QTableWidgetItem
 from codigo.utilidades import PadraoDeCores
+from codigo.utilidades.padrao_de_cores import BotoesCores
 from codigo.componentes.botao import Botao
 from operator import itemgetter
 
@@ -269,8 +270,13 @@ class Tabela(QTableWidget):
         ..Returns::
             [Botao] -- objeto do tipo Botao
         """
-        botao = Botao(parent=self, texto=celula.informacao, tipo=Botao.TIPO.INFORMACAO)
+        if celula.cor == BotoesCores.perigo.botao:
+            botao = Botao(parent=self, texto=celula.informacao, tipo=Botao.TIPO.PERIGO)
+        else:
+            botao = Botao(parent=self, texto=celula.informacao, tipo=Botao.TIPO.INFORMACAO)
+
         botao.clique(celula.clique)
+
         return botao
 
     @Slot()
@@ -294,7 +300,10 @@ class Tabela(QTableWidget):
 
         def ordenar(coluna:list):
             if coluna[index].tipo == Celula.TIPO.NUMERICO:
-                return float(coluna[index].informacao.replace('R','').replace('$','').replace('%','').replace(' ','').replace('.','').replace(',','.'))
+                try:
+                    return float(coluna[index].informacao.replace('R','').replace('$','').replace('%','').replace(' ','').replace('.','').replace(',','.'))
+                except:
+                    return -1.0
             else:
                 return coluna[index].informacao
 

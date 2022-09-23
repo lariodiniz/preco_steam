@@ -1,4 +1,4 @@
-site_name: Preços Steam
+site_name: Jogos Desejados
 
 theme:
   name: material #para usar esse tema é preciso instalar o mkdocs-material

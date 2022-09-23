@@ -1,7 +1,7 @@
-# Preços Steam
+# Jogos Desejados
 ---
 
-Bem vindo a documentação do Steam Preços. Nossa documentação é dividida em duas partes:
+Bem vindo a documentação do Jogos Desejados. Nossa documentação é dividida em duas partes:
 
 * **[Usuarios](usuarios/)**: Esta parte documenta como um usuario padrão pode utilizar o nosso sistema.
 

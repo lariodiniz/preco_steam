@@ -16,6 +16,7 @@ from codigo.utilidades.cria_layouts.moldura import cria_layout_moldura
 
 
 from codigo.componentes import (Botao, Celula, Rotulo, Tabela)
+from codigo.utilidades.padrao_de_cores import BotoesCores
 class TelaDetalhe(QDialog):
 
     def __formata_descricao(self):
@@ -26,18 +27,17 @@ class TelaDetalhe(QDialog):
         """Função de Inicialização da janela."""
         # inicializa a classe pai.
         super().__init__(parent, *args, **kwargs)
-        self.aplicacao = parent
+        self.__aplicacao = parent
         self.jogo = Jogos().buscar_id(id_jogo)
         self.preco = Precos().buscar_precos_do_jogo(self.jogo, ordem=Precos.data.desc())
         self.__formata_descricao()
-        appIcon = QIcon(self.aplicacao.busca_imagem(self.aplicacao.pasta_icones, 'logo.png'))
+        appIcon = QIcon(self.__aplicacao.busca_imagem(self.__aplicacao.pasta_icones, 'logo.png'))
         self.setWindowIcon(appIcon)
         self.resize(500, 400)
-        self.setStyleSheet(f'background-color: {self.aplicacao.cores.fundo}')
+        self.setStyleSheet(f'background-color: {self.__aplicacao.cores.fundo}')
         # Configura o tamanho minimo da aplicação.
         self.setMinimumSize(500, 400)
         self.setMaximumSize(500, 400)
-
 
         title = f'Detalhe do jogo {self.jogo.nome}'
 
@@ -109,34 +109,70 @@ class TelaDetalhe(QDialog):
     def cria_tabela(self):
         layout = cria_layout_caixa_horizontal(self.area_tabela)
         layout.setContentsMargins(10,0,10,0)
-        titulos = ['Data', 'Valor']
+
+        titulos = ['Data', 'Valor', ' ']
         self.tabela = Tabela(titulos)
         self.tabela.setRowCount(len(self.preco))
         self.tabela.desenha_tabela()
-        
+
         layout.addWidget(self.tabela, alignment=Qt.AlignTop, stretch=1)
+
+    @Slot()
+    def __clique_botao_apagar(self) -> None:
+        """Metodo de Clique no botão apagar
+        verifica na Steam as promoções.
+
+        ..Returns::
+            None
+        """
+        linha_selecionada  = self.tabela.currentRow()
+        if linha_selecionada:
+            preco = self.preco[linha_selecionada]
+            data_do_preco = preco.data
+            pergunta = self.__aplicacao.janela_pergunta(titulo='Você tem certeza?',
+            texto=f'Você gostaria de apagar o preço da data "{data_do_preco}"?')
+            resp = pergunta.exec_()
+            if pergunta.sucesso(resp):
+                preco.deletar()
+                self.preco = Precos().buscar_precos_do_jogo(self.jogo, ordem=Precos.data.desc())
+                self.mostra_tabela()
+                self.__aplicacao.janela_aviso(titulo='Sucesso!',
+                    texto=f'preço da data "{data_do_preco}" deletado.')
 
     def mostra_tabela(self):
         dados = []
 
         for preco in self.preco:
+            botao = Celula('Apagar')
+            botao.tipo = Celula.TIPO.BOTAO
+            botao.tipo = Celula.TIPO.BOTAO
+            botao.cor = BotoesCores.perigo.botao
+            botao.define_clique(self.__clique_botao_apagar)
             dados.append([
                 Celula(preco.data.strftime("%d/%m/%Y")),
-                Celula(formata_dinheiro(preco.valor))
+                Celula(formata_dinheiro(preco.valor)),
+                botao
             ])
 
         self.tabela.dados = dados
         self.tabela.desenha_tabela()
+        self.tabela.setColumnWidth(0, 200)
+        self.tabela.setColumnWidth(1, 150)
         
     def mostra_botoes(self):
-        layout = cria_layout_caixa_horizontal(self.area_botoes)
+        layout = cria_layout_caixa_horizontal(self.area_botoes,
+            distancia_baixo=5,
+            distancia_topo=5)
+
         icone='sincronia.png'
-        botao_steam = Botao(parent=self.aplicacao, 
-        texto='', 
-        tipo=Botao.TIPO.INFORMACAO, 
-        icone=icone, 
-        largura_maxima=150, 
-        largura_minima=150)
+        botao_steam = Botao(parent=self.__aplicacao, 
+            texto='', 
+            tipo=Botao.TIPO.INFORMACAO, 
+            icone=icone,
+            largura_maxima=45,
+            altura= 40,
+            largura_minima=45)
+
         botao_steam.clique(self.__clique_notao_steam)
 
         layout.addWidget(botao_steam)
